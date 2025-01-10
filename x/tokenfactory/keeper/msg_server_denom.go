@@ -13,15 +13,16 @@ import (
 func (k msgServer) CreateDenom(goCtx context.Context, msg *types.MsgCreateDenom) (*types.MsgCreateDenomResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// Check if the value already exists
+	// Check if the denom already exists
 	_, isFound := k.GetDenom(
 		ctx,
 		msg.Denom,
 	)
 	if isFound {
-		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "index already set")
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "Denom already exist")
 	}
 
+	var zero int32 = 0
 	var denom = types.Denom{
 		Owner:              msg.Owner,
 		Denom:              msg.Denom,
@@ -30,7 +31,7 @@ func (k msgServer) CreateDenom(goCtx context.Context, msg *types.MsgCreateDenom)
 		Precision:          msg.Precision,
 		Url:                msg.Url,
 		MaxSupply:          msg.MaxSupply,
-		Supply:             msg.Supply,
+		Supply:             zero,
 		CanChangeMaxSupply: msg.CanChangeMaxSupply,
 	}
 
@@ -50,23 +51,35 @@ func (k msgServer) UpdateDenom(goCtx context.Context, msg *types.MsgUpdateDenom)
 		msg.Denom,
 	)
 	if !isFound {
-		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
+		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "Denom to update not found")
 	}
 
 	// Checks if the msg owner is the same as the current owner
 	if msg.Owner != valFound.Owner {
-		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "incorrect owner")
+		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "Incorrect owner")
+	}
+
+	if !valFound.CanChangeMaxSupply {
+		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "Cannot change maxsupply")
+	}
+
+	if valFound.MaxSupply != msg.MaxSupply {
+		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "Max supply already reached")
+	}
+
+	if !valFound.CanChangeMaxSupply && msg.CanChangeMaxSupply {
+		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "Cannot revert change maxsupply flag")
 	}
 
 	var denom = types.Denom{
 		Owner:              msg.Owner,
 		Denom:              msg.Denom,
 		Description:        msg.Description,
-		Ticker:             msg.Ticker,
-		Precision:          msg.Precision,
+		Ticker:             valFound.Ticker,
+		Precision:          valFound.Precision,
 		Url:                msg.Url,
 		MaxSupply:          msg.MaxSupply,
-		Supply:             msg.Supply,
+		Supply:             valFound.Supply,
 		CanChangeMaxSupply: msg.CanChangeMaxSupply,
 	}
 
@@ -74,28 +87,3 @@ func (k msgServer) UpdateDenom(goCtx context.Context, msg *types.MsgUpdateDenom)
 
 	return &types.MsgUpdateDenomResponse{}, nil
 }
-
-// func (k msgServer) DeleteDenom(goCtx context.Context, msg *types.MsgDeleteDenom) (*types.MsgDeleteDenomResponse, error) {
-// 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-// 	// Check if the value exists
-// 	valFound, isFound := k.GetDenom(
-// 		ctx,
-// 		msg.Denom,
-// 	)
-// 	if !isFound {
-// 		return nil, errorsmod.Wrap(sdkerrors.ErrKeyNotFound, "index not set")
-// 	}
-
-// 	// Checks if the msg owner is the same as the current owner
-// 	if msg.Owner != valFound.Owner {
-// 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "incorrect owner")
-// 	}
-
-// 	k.RemoveDenom(
-// 		ctx,
-// 		msg.Denom,
-// 	)
-
-// 	return &types.MsgDeleteDenomResponse{}, nil
-// }
