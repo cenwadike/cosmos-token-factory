@@ -22,6 +22,7 @@ func (k msgServer) CreateDenom(goCtx context.Context, msg *types.MsgCreateDenom)
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "Denom already exist")
 	}
 
+	// update state
 	var zero int32 = 0
 	var denom = types.Denom{
 		Owner:              msg.Owner,
@@ -71,6 +72,7 @@ func (k msgServer) UpdateDenom(goCtx context.Context, msg *types.MsgUpdateDenom)
 		return nil, errorsmod.Wrap(sdkerrors.ErrUnauthorized, "Cannot revert change maxsupply flag")
 	}
 
+	// Update state
 	var denom = types.Denom{
 		Owner:              msg.Owner,
 		Denom:              msg.Denom,
