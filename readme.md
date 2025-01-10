@@ -1,5 +1,10 @@
-# tokenfactory
-**tokenfactory** is a blockchain built using Cosmos SDK and Tendermint and created with [Ignite CLI](https://ignite.com/cli).
+# Token Factory
+
+**TokenFactory** is a blockchain built using Cosmos SDK and Tendermint and created with [Ignite CLI](https://ignite.com/cli).
+
+It mints and sends denoms. It also allows the transfer of authority of denoms.
+
+NOTE: This is a practice project
 
 ## Get started
 
