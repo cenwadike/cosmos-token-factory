@@ -8,6 +8,7 @@ package tokenfactory
 
 import (
 	context "context"
+
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,9 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Msg_UpdateParams_FullMethodName = "/tokenfactory.tokenfactory.Msg/UpdateParams"
-	Msg_CreateDenom_FullMethodName  = "/tokenfactory.tokenfactory.Msg/CreateDenom"
-	Msg_UpdateDenom_FullMethodName  = "/tokenfactory.tokenfactory.Msg/UpdateDenom"
+	Msg_UpdateParams_FullMethodName      = "/tokenfactory.tokenfactory.Msg/UpdateParams"
+	Msg_CreateDenom_FullMethodName       = "/tokenfactory.tokenfactory.Msg/CreateDenom"
+	Msg_UpdateDenom_FullMethodName       = "/tokenfactory.tokenfactory.Msg/UpdateDenom"
+	Msg_MintAndSendTokens_FullMethodName = "/tokenfactory.tokenfactory.Msg/MintAndSendTokens"
+	Msg_Transfer_FullMethodName          = "/tokenfactory.tokenfactory.Msg/Transfer"
 )
 
 // MsgClient is the client API for Msg service.
@@ -33,6 +36,8 @@ type MsgClient interface {
 	UpdateParams(ctx context.Context, in *MsgUpdateParams, opts ...grpc.CallOption) (*MsgUpdateParamsResponse, error)
 	CreateDenom(ctx context.Context, in *MsgCreateDenom, opts ...grpc.CallOption) (*MsgCreateDenomResponse, error)
 	UpdateDenom(ctx context.Context, in *MsgUpdateDenom, opts ...grpc.CallOption) (*MsgUpdateDenomResponse, error)
+	MintAndSendTokens(ctx context.Context, in *MsgMintAndSendTokens, opts ...grpc.CallOption) (*MsgMintAndSendTokensResponse, error)
+	Transfer(ctx context.Context, in *MsgTransfer, opts ...grpc.CallOption) (*MsgTransferResponse, error)
 }
 
 type msgClient struct {
@@ -70,6 +75,24 @@ func (c *msgClient) UpdateDenom(ctx context.Context, in *MsgUpdateDenom, opts ..
 	return out, nil
 }
 
+func (c *msgClient) MintAndSendTokens(ctx context.Context, in *MsgMintAndSendTokens, opts ...grpc.CallOption) (*MsgMintAndSendTokensResponse, error) {
+	out := new(MsgMintAndSendTokensResponse)
+	err := c.cc.Invoke(ctx, Msg_MintAndSendTokens_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) Transfer(ctx context.Context, in *MsgTransfer, opts ...grpc.CallOption) (*MsgTransferResponse, error) {
+	out := new(MsgTransferResponse)
+	err := c.cc.Invoke(ctx, Msg_Transfer_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility
@@ -79,6 +102,8 @@ type MsgServer interface {
 	UpdateParams(context.Context, *MsgUpdateParams) (*MsgUpdateParamsResponse, error)
 	CreateDenom(context.Context, *MsgCreateDenom) (*MsgCreateDenomResponse, error)
 	UpdateDenom(context.Context, *MsgUpdateDenom) (*MsgUpdateDenomResponse, error)
+	MintAndSendTokens(context.Context, *MsgMintAndSendTokens) (*MsgMintAndSendTokensResponse, error)
+	Transfer(context.Context, *MsgTransfer) (*MsgTransferResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -94,6 +119,12 @@ func (UnimplementedMsgServer) CreateDenom(context.Context, *MsgCreateDenom) (*Ms
 }
 func (UnimplementedMsgServer) UpdateDenom(context.Context, *MsgUpdateDenom) (*MsgUpdateDenomResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateDenom not implemented")
+}
+func (UnimplementedMsgServer) MintAndSendTokens(context.Context, *MsgMintAndSendTokens) (*MsgMintAndSendTokensResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MintAndSendTokens not implemented")
+}
+func (UnimplementedMsgServer) Transfer(context.Context, *MsgTransfer) (*MsgTransferResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Transfer not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -162,6 +193,42 @@ func _Msg_UpdateDenom_Handler(srv interface{}, ctx context.Context, dec func(int
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_MintAndSendTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgMintAndSendTokens)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).MintAndSendTokens(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_MintAndSendTokens_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).MintAndSendTokens(ctx, req.(*MsgMintAndSendTokens))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_Transfer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgTransfer)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).Transfer(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_Transfer_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).Transfer(ctx, req.(*MsgTransfer))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -180,6 +247,14 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateDenom",
 			Handler:    _Msg_UpdateDenom_Handler,
+		},
+		{
+			MethodName: "MintAndSendTokens",
+			Handler:    _Msg_MintAndSendTokens_Handler,
+		},
+		{
+			MethodName: "Transfer",
+			Handler:    _Msg_Transfer_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
